@@ -1,4 +1,4 @@
-# 🐼 ANGrI - An N-Gram Interface
+# 😠 ANGrI - An N-Gram Interface
 
 > A delightful way to practice Chinese characters using n-grams! 🎉
 
@@ -31,6 +31,8 @@ Built with:
 - Tailwind CSS for sleek styling
 - Custom pickle loader for model management
 
+N-gram models were trained using transcripts from the wonderful Chinese cooking YouTube channel [一画美食 One Foodie](https://www.youtube.com/@onefoodie) 🧑‍🍳
+
 ## 🎨 Interface
 
 The app features a clean, three-panel design:
@@ -42,12 +44,15 @@ The app features a clean, three-panel design:
 
 1. Install dependencies:
 
+```bash
 pip install flask pypinyin
+```
 
 2. Run the Flask server:
 
+```bash
 python main.py
-
+```
 
 3. Visit `http://localhost:5000` and start learning! 🎓
 
