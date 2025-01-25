@@ -23,7 +23,7 @@ N-gram models were trained using transcripts from the wonderful Chinese cooking 
 1. Install dependencies:
 
 ```bash
-pip install flask pypinyin
+pip install flask pypinyin googletrans
 ```
 
 2. Run the Flask server:
