@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese N-gram Review</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .option-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .option-card:hover {
+            border-left-color: #2563eb;
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .option-card.selected {
+            border-left-color: #2563eb;
+            background-color: #f8faff;
+        }
+        .queue-card {
+            transform: translateX(-100%);
+            animation: slideIn 0.3s forwards;
+        }
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+        .queue-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        .queue-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .queue-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .queue-container::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="flex min-h-screen">
+        <!-- Queue Panel -->
+        <div class="w-64 bg-white border-r border-gray-100 p-4">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 px-2">Review Queue</h2>
+            <div id="queueContainer" class="queue-container space-y-2">
+                <!-- Queue cards will be added here -->
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <div class="flex-1 flex flex-col">
+                <div class="flex-1 flex items-center justify-center relative">
+                    <!-- Logo -->
+                    <div class="absolute left-12 top-12 flex items-center">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="h-24 w-auto">
+                        <div class="ml-4 flex flex-col">
+                            <span class="text-4xl font-bold text-gray-800">ANGrI</span>
+                            <span class="text-lg text-gray-600">An N-Gram Interface</span>
+                        </div>
+                    </div>
+
+                    <div id="result" class="opacity-0 transition-opacity duration-200 w-[800px] text-center mt-48">
+                        <div id="pinyin" class="text-7xl mb-16 font-medium"></div>
+                        <div id="translation" class="text-6xl text-gray-700 invisible"></div>
+                    </div>
+                </div>
+
+                <!-- Bottom Buttons -->
+                <div class="flex justify-center pb-8 pt-16">
+                    <div class="flex items-center space-x-4">
+                        <button id="reviewBtn" class="bg-red-800 text-white py-2 px-12 rounded-lg hover:bg-red-900 transition duration-200 font-medium shadow-sm hover:shadow-md text-lg flex flex-col items-center">
+                            <span>Review</span>
+                            <span class="text-sm mt-1 opacity-80">←</span>
+                        </button>
+                        <div class="flex flex-col space-y-2">
+                            <button id="pronounceBtn" class="bg-gray-400 text-white py-2 px-12 rounded-lg hover:bg-gray-500 transition duration-200 font-medium shadow-sm hover:shadow-md text-lg flex flex-col items-center">
+                                <span>Pronounce</span>
+                                <span class="text-sm mt-1 opacity-80">↑</span>
+                            </button>
+                            <button id="showTranslationBtn" class="bg-gray-400 text-white py-2 px-12 rounded-lg hover:bg-gray-500 transition duration-200 font-medium shadow-sm hover:shadow-md text-lg flex flex-col items-center">
+                                <span>Translate</span>
+                                <span class="text-sm mt-1 opacity-80">↓</span>
+                            </button>
+                        </div>
+                        <button id="sampleBtn" class="bg-green-600 text-white py-2 px-12 rounded-lg hover:bg-green-700 transition duration-200 font-medium shadow-sm hover:shadow-md text-lg flex flex-col items-center">
+                            <span>Next</span>
+                            <span class="text-sm mt-1 opacity-80">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Options Panel -->
+        <div class="w-72 bg-white border-l border-gray-100">
+            <div class="h-full flex flex-col">
+                <div class="flex-1 grid grid-rows-5 gap-0">
+                    <label class="option-card flex items-center p-8 cursor-pointer selected">
+                        <input type="radio" name="ngramSize" value="1" class="form-radio h-5 w-5 text-blue-600 hidden" checked>
+                        <div>
+                            <span class="block text-xl font-medium text-gray-800">1-gram</span>
+                            <span class="text-sm text-gray-500">Single character (1)</span>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card flex items-center p-8 cursor-pointer">
+                        <input type="radio" name="ngramSize" value="2" class="form-radio h-5 w-5 text-blue-600 hidden">
+                        <div>
+                            <span class="block text-xl font-medium text-gray-800">2-gram</span>
+                            <span class="text-sm text-gray-500">Two characters (2)</span>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card flex items-center p-8 cursor-pointer">
+                        <input type="radio" name="ngramSize" value="3" class="form-radio h-5 w-5 text-blue-600 hidden">
+                        <div>
+                            <span class="block text-xl font-medium text-gray-800">3-gram</span>
+                            <span class="text-sm text-gray-500">Three characters (3)</span>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card flex items-center p-8 cursor-pointer">
+                        <input type="radio" name="ngramSize" value="4" class="form-radio h-5 w-5 text-blue-600 hidden">
+                        <div>
+                            <span class="block text-xl font-medium text-gray-800">4-gram</span>
+                            <span class="text-sm text-gray-500">Four characters (4)</span>
+                        </div>
+                    </label>
+
+                    <label class="option-card flex items-center p-8 cursor-pointer">
+                        <input type="radio" name="mode" value="review" class="form-radio h-5 w-5 text-blue-600 hidden">
+                        <div>
+                            <span class="block text-xl font-medium text-gray-800">Review</span>
+                            <span class="text-sm text-gray-500">Practice queue (Q)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get all radio buttons and option cards
+        const radioButtons = document.getElementsByName('ngramSize');
+        const optionCards = document.querySelectorAll('.option-card');
+        const result = document.getElementById('result');
+        const queueContainer = document.getElementById('queueContainer');
+        const reviewedItems = [];
+        let isReviewMode = false;
+        
+        // Initialize speech synthesis
+        const synth = window.speechSynthesis;
+        
+        function clearContent() {
+            // Hide any existing content with fade
+            result.classList.add('opacity-0');
+            // Clear the content after fade
+            setTimeout(() => {
+                document.getElementById('pinyin').textContent = '';
+                document.getElementById('translation').textContent = '';
+                document.getElementById('translation').classList.add('invisible');
+            }, 200);
+        }
+        
+        function speakChinese(text) {
+            // Cancel any ongoing speech
+            synth.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';  // Set language to Chinese
+            utterance.rate = 0.8;      // Slightly slower rate for clarity
+            
+            synth.speak(utterance);
+        }
+        
+        function addToQueue(pinyin) {
+            if (!pinyin || reviewedItems.includes(pinyin)) return;
+            
+            const card = document.createElement('div');
+            card.className = 'queue-card bg-gray-50 p-3 rounded-lg text-gray-700 text-sm font-medium border border-gray-100';
+            card.textContent = pinyin;
+            card.dataset.translation = document.getElementById('translation').textContent;
+            // Store the characters for pronunciation when reviewing
+            card.dataset.characters = document.getElementById('characters')?.textContent || '';
+            queueContainer.insertBefore(card, queueContainer.firstChild);
+            reviewedItems.push(pinyin);
+        }
+
+        function dequeueItem() {
+            const lastCard = queueContainer.lastElementChild;
+            if (lastCard) {
+                const pinyin = lastCard.textContent;
+                const translation = lastCard.dataset.translation;
+                const characters = lastCard.dataset.characters;
+                lastCard.remove();
+                // Remove from reviewedItems array
+                const index = reviewedItems.indexOf(pinyin);
+                if (index > -1) {
+                    reviewedItems.splice(index, 1);
+                }
+                return { pinyin, translation, characters };
+            }
+            return null;
+        }
+
+        // Add click handlers for option cards
+        optionCards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                if (index === 4) { // Review option
+                    isReviewMode = true;
+                    optionCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    clearContent();
+                } else {
+                    isReviewMode = false;
+                    optionCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    clearContent();
+                }
+            });
+        });
+        
+        document.getElementById('sampleBtn').addEventListener('click', async () => {
+            if (isReviewMode) {
+                // In review mode, dequeue and display next item
+                const nextItem = dequeueItem();
+                if (nextItem) {
+                    document.getElementById('pinyin').textContent = nextItem.pinyin;
+                    document.getElementById('translation').textContent = nextItem.translation;
+                    document.getElementById('translation').classList.add('invisible');
+                    result.classList.remove('opacity-0');
+                    result.style.visibility = 'visible';
+                    // Speak the characters after a short delay to let the transition complete
+                    setTimeout(() => speakChinese(nextItem.characters), 500);
+                } else {
+                    alert('Review queue is empty!');
+                }
+            } else {
+                let n;
+                for (const rb of radioButtons) {
+                    if (rb.checked) {
+                        n = rb.value;
+                        break;
+                    }
+                }
+                
+                const response = await fetch('/sample', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ n: parseInt(n) })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                document.getElementById('pinyin').textContent = data.pinyin;
+                document.getElementById('translation').textContent = data.translation;
+                document.getElementById('characters').textContent = data.characters;
+                document.getElementById('translation').classList.add('invisible');
+                result.classList.remove('opacity-0');
+                result.style.visibility = 'visible';
+                // Speak the characters after a short delay to let the transition complete
+                setTimeout(() => speakChinese(data.characters), 500);
+            }
+        });
+
+        document.getElementById('showTranslationBtn').addEventListener('click', () => {
+            const translation = document.getElementById('translation');
+            translation.classList.toggle('invisible');
+        });
+
+        document.getElementById('reviewBtn').addEventListener('click', () => {
+            const currentPinyin = document.getElementById('pinyin').textContent;
+            if (currentPinyin) {
+                addToQueue(currentPinyin);
+            }
+        });
+
+        // Add keyboard event listener
+        document.addEventListener('keydown', (event) => {
+            // Prevent default behavior for these keys
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || 
+                event.key === 'ArrowUp' || event.key === 'ArrowDown' || 
+                (event.key >= '1' && event.key <= '4') || 
+                event.key.toLowerCase() === 'q') {
+                event.preventDefault();
+            }
+
+            // Handle key presses
+            switch (event.key.toLowerCase()) {
+                case 'arrowleft':
+                    document.getElementById('reviewBtn').click();
+                    break;
+                case 'arrowdown':  // Down arrow key for translate
+                    document.getElementById('showTranslationBtn').click();
+                    break;
+                case 'arrowup':  // Up arrow key
+                    document.getElementById('pronounceBtn').click();
+                    break;
+                case 'arrowright':
+                    document.getElementById('sampleBtn').click();
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    const index = parseInt(event.key) - 1;
+                    const optionCard = optionCards[index];
+                    if (optionCard) {
+                        optionCard.click();
+                        // Also check the radio button
+                        const radio = optionCard.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = true;
+                    }
+                    break;
+                case 'q':
+                    // Select the Review mode option (last option card)
+                    const reviewOption = optionCards[optionCards.length - 1];
+                    if (reviewOption) {
+                        reviewOption.click();
+                        const radio = reviewOption.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = true;
+                    }
+                    break;
+            }
+        });
+
+        // Add pronounce button handler
+        document.getElementById('pronounceBtn').addEventListener('click', () => {
+            const characters = document.getElementById('characters')?.textContent;
+            if (characters) {
+                speakChinese(characters);
+            }
+        });
+
+        // Add a hidden div to store characters
+        const charactersDiv = document.createElement('div');
+        charactersDiv.id = 'characters';
+        charactersDiv.style.display = 'none';
+        document.body.appendChild(charactersDiv);
+    </script>
+</body>
+</html> 
