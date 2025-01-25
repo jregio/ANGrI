@@ -2,6 +2,10 @@
 
 > A better way to practice Chinese vocabulary using n-grams! 🎉
 
+## Credits
+
+N-gram models were trained using transcripts from the wonderful Chinese cooking YouTube channel [一画美食 One Foodie](https://www.youtube.com/@onefoodie) 🧑‍🍳
+
 ## How to Use
 
 1. **Choose Your N-gram Model**
@@ -13,8 +17,6 @@
    - ⬇️ (Down Arrow) - Show/hide translation
    - ⬅️ (Left Arrow) - Add to review queue
    - Q - Switch to review mode
-
-N-gram models were trained using transcripts from the wonderful Chinese cooking YouTube channel [一画美食 One Foodie](https://www.youtube.com/@onefoodie) 🧑‍🍳
 
 ## Getting Started
 
