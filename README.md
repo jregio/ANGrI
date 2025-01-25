@@ -31,3 +31,7 @@ python main.py
 ```
 
 3. Visit `http://localhost:5000` and start learning! 🎓
+
+## Screenshot
+
+![ANGrI Screenshot](static/screenshot.png)
