@@ -32,7 +32,7 @@ pip install flask pypinyin
 python main.py
 ```
 
-3. Visit `http://localhost:5000` and start learning! 🎓
+3. Visit `http://127.0.0.1:5000/` and start learning! 🎓
 
 ## Screenshot
 
